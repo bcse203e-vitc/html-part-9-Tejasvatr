@@ -1,0 +1,114 @@
+<html>
+<head>
+    <title>Appointment Booking</title>
+    <link rel="stylesheet" href="styles1.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2>Online Appointment Booking</h2><br>
+        <button class="book-btn" onclick="openModal()">Book Appointment</button>
+    </div>
+
+    <div class="modal" id="modal">
+        <span class="close" onclick="closeModal()">X</span>
+        <h3>Book an Appointment</h3>
+        <form id="appointmentForm">
+            <input type="text" id="name" placeholder="Full Name" required>
+            <span class="error" id="nameError"></span>
+
+            <input type="email" id="email" placeholder="Email Address" required>
+            <span class="error" id="emailError"></span>
+
+            <input type="tel" id="phone" placeholder="Phone Number (10 digits)" required>
+            <span class="error" id="phoneError"></span>
+
+            <select id="service" required>
+                <option value="">Select Service</option>
+                <option value="Doctor">Doctor</option>
+                <option value="Salon">Salon</option>
+                <option value="Car Service">Car Service</option>
+            </select>
+
+            <input type="datetime-local" id="datetime" required>
+            <span class="error" id="dateError"></span>
+
+            <textarea id="requests" placeholder="Special Requests (Optional)"></textarea>
+
+            <label>
+                <input type="checkbox" id="terms"> Agree to Terms
+            </label>
+            <span class="error" id="termsError"></span>
+
+            <button type="button" onclick="submitForm()">Submit</button>
+        </form>
+    </div>
+
+    <br><h3>Booked Appointments</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Service</th>
+                <th>Date & Time</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="appointmentList"></tbody>
+    </table>
+
+    <script>
+        function openModal() {
+            document.getElementById("modal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+
+        function submitForm() {
+            let name = document.getElementById("name").value;
+            let email = document.getElementById("email").value;
+            let phone = document.getElementById("phone").value;
+            let service = document.getElementById("service").value;
+            let datetime = document.getElementById("datetime").value;
+            let terms = document.getElementById("terms").checked;
+
+            let valid = true;
+
+            document.getElementById("nameError").innerText = name ? "" : "Name is required";
+            document.getElementById("emailError").innerText = email.includes("@") ? "" : "Invalid email";
+            document.getElementById("phoneError").innerText = phone.length === 10 ? "" : "Phone must be 10 digits";
+            document.getElementById("dateError").innerText = datetime > new Date().toISOString() ? "" : "Date must be in the future";
+            document.getElementById("termsError").innerText = terms ? "" : "You must agree to terms";
+
+            if (!name || !email.includes("@") || phone.length !== 10 || datetime <= new Date().toISOString() || !terms) {
+                valid = false;
+            }
+
+            if (valid) {
+                let appointment = { name, service, datetime, status: "Pending" };
+                let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+                appointments.push(appointment);
+                localStorage.setItem("appointments", JSON.stringify(appointments));
+                displayAppointments();
+                closeModal();
+            }
+        }
+
+        function displayAppointments() {
+            let list = document.getElementById("appointmentList");
+            list.innerHTML = "";
+            let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+            appointments.forEach(a => {
+                let row = `<tr><td>${a.name}</td><td>${a.service}</td><td>${a.datetime}</td><td>${a.status}</td></tr>`;
+                list.innerHTML += row;
+            });
+        }
+
+        displayAppointments();
+    </script>
+</body>
+</html>
+
+
